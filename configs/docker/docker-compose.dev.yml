@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+    nginx:
+        container_name: nginx
+        image: ${NGINX_IMAGE}
+        restart: always
+        network_mode: host
+        ports:
+            - ${WEB_PORT}:6700
+        environment:
+            WEB_CLIENT_HOST: localhost
+        volumes:
+            - ../nginx:/etc/nginx/templates

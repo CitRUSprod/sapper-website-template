@@ -1,0 +1,5 @@
+*.log
+.dockerignore
+Dockerfile
+node_modules
+__sapper__

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+SCRIPTS_DIR=$(dirname "$0")
+ROOT_DIR=$SCRIPTS_DIR/..
+DOCKER_CONFIGS_DIR=$ROOT_DIR/configs/docker
+
+MODE=$1
+
+shift
+
+"$SCRIPTS_DIR"/copy-env
+. "$ROOT_DIR"/.env
+docker-compose -f "$DOCKER_CONFIGS_DIR"/docker-compose."$MODE".yml -p "$PROJECT_NAME"_"$MODE" "$@"

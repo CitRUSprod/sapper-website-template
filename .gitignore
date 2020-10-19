@@ -1,0 +1,7 @@
+*.log
+.env
+.vscode
+/volumes
+dist
+node_modules
+__sapper__
