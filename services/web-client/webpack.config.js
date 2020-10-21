@@ -23,6 +23,37 @@ const alias = {
 const extensions = [".mjs", ".js", ".ts", ".json", ".svelte", ".html"]
 const mainFields = ["svelte", "module", "browser", "main"]
 
+const preprocess = sveltePreprocess({
+    scss: {
+        includePaths: ["src/theme"]
+    }
+})
+
+const styleLoaders = [
+    "style-loader",
+    {
+        loader: "css-loader",
+        options: {
+            sourceMap: true,
+            importLoaders: 1
+        }
+    },
+    {
+        loader: "postcss-loader",
+        options: {
+            sourceMap: true,
+            postcssOptions: {
+                plugins: [
+                    require("autoprefixer")({
+                        overrideBrowserslist: ["> 1%", "last 2 version"]
+                    }),
+                    require("cssnano")
+                ]
+            }
+        }
+    }
+]
+
 module.exports = {
     client: {
         entry: { main: config.client.entry().main.replace(/\.js$/, ".ts") },
@@ -42,14 +73,39 @@ module.exports = {
                     }
                 },
                 {
+                    test: /\.css$/,
+                    use: styleLoaders
+                },
+                {
+                    test: /\.scss$/,
+                    use: [
+                        ...styleLoaders,
+                        {
+                            loader: "sass-loader",
+                            options: {
+                                sourceMap: true
+                            }
+                        }
+                    ]
+                },
+                {
                     test: /\.(svelte|html)$/,
                     use: {
                         loader: "svelte-loader-hot",
                         options: {
                             dev,
                             hydratable: true,
-                            preprocess: sveltePreprocess(),
+                            preprocess,
                             hotReload: true
+                        }
+                    }
+                },
+                {
+                    test: /\.(eot|otf|ttf|woff2?|svg)$/,
+                    use: {
+                        loader: "file-loader",
+                        options: {
+                            name: "fonts/[name].[ext]"
                         }
                     }
                 }
@@ -60,10 +116,7 @@ module.exports = {
             ...(dev ? [new HotModuleReplacementPlugin()] : []),
             new DefinePlugin({
                 "process.browser": true,
-                "process.env.NODE_ENV": JSON.stringify(mode),
-                "process.env.PROJECT_NAME": JSON.stringify(
-                    process.env.PROJECT_NAME
-                )
+                "process.env.NODE_ENV": JSON.stringify(mode)
             }),
             new ESBuildPlugin()
         ],
@@ -96,7 +149,7 @@ module.exports = {
                             css: false,
                             generate: "ssr",
                             hydratable: true,
-                            preprocess: sveltePreprocess(),
+                            preprocess,
                             dev
                         }
                     }

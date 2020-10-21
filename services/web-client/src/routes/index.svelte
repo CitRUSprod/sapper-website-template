@@ -1,6 +1,12 @@
 <script lang="ts">
-    const projectName: string = process.env.PROJECT_NAME
+    import { Alert, Icon } from "svelte-materialify/src"
 </script>
 
-<h1>Website Template</h1>
-<h2>{projectName}</h2>
+<div class="d-flex justify-center align-center fill-height">
+    <Alert class="success-color">
+        <div slot="icon">
+            <Icon class="mdi mdi-check" />
+        </div>
+        <h4>Website Template</h4>
+    </Alert>
+</div>
