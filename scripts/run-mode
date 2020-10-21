@@ -11,3 +11,4 @@ shift
 "$SCRIPTS_DIR"/copy-env
 . "$ROOT_DIR"/.env
 docker-compose -f "$DOCKER_CONFIGS_DIR"/docker-compose."$MODE".yml -p "$PROJECT_NAME"_"$MODE" "$@"
+docker rmi -f "$(docker images -qf "dangling=true")" > /dev/null 2>&1
