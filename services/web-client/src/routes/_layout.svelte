@@ -2,21 +2,28 @@
     export const preload = () => {}
 </script>
 
+<script lang="ts">
+    import { MaterialApp } from "svelte-materialify/src"
+</script>
+
 <svelte:head>
     <title>Website Template</title>
 </svelte:head>
-<slot />
+
+<MaterialApp>
+    <slot />
+</MaterialApp>
 
 <style lang="scss">
-    :global(#sapper) {
+    :global(#sapper, .s-app) {
         height: 100%;
     }
 
     :global(.fill-height) {
-        height: 100%;
+        height: 100% !important;
     }
 
     :global(.fill-width) {
-        height: 100%;
+        width: 100% !important;
     }
 </style>
