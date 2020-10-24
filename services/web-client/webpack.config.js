@@ -11,13 +11,13 @@ const dev = mode === "development"
 
 if (dev) {
     dotenv.config({
-        path: path.resolve("../../.env")
+        path: path.join(__dirname, "../../.env")
     })
 }
 
 const alias = {
-    "@": path.resolve("src"),
-    svelte: path.resolve("node_modules", "svelte")
+    "@": path.join(__dirname, "src"),
+    svelte: path.join(__dirname, "node_modules/svelte")
 }
 
 const extensions = [".mjs", ".js", ".ts", ".json", ".svelte", ".html"]
