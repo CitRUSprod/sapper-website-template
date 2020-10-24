@@ -1,0 +1,27 @@
+{
+    "name": "api",
+    "scripts": {
+        "dev": "webpack --config ./webpack/dev.js",
+        "prod": "webpack --config ./webpack/prod.js",
+        "start": "node ./dist/main.js"
+    },
+    "devDependencies": {
+        "@types/node": "14.14.2",
+        "clean-webpack-plugin": "3.0.0",
+        "dotenv": "8.2.0",
+        "esbuild-loader": "2.4.0",
+        "nodemon-webpack-plugin": "4.3.2",
+        "source-map-support": "0.5.19",
+        "tslib": "2.0.3",
+        "typescript": "4.0.3",
+        "webpack": "4.44.2",
+        "webpack-cli": "4.1.0",
+        "webpack-merge": "5.2.0",
+        "webpack-node-externals": "2.5.2"
+    },
+    "dependencies": {
+        "fastify": "3.7.0",
+        "fastify-auth": "1.0.1",
+        "fastify-jwt": "2.1.3"
+    }
+}

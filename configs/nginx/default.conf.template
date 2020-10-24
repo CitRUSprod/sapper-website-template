@@ -4,4 +4,8 @@ server {
     location / {
         proxy_pass http://${WEB_CLIENT_HOST}:6701/;
     }
+
+    location /api/ {
+        proxy_pass http://${API_HOST}:6702/;
+    }
 }

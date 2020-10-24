@@ -9,6 +9,7 @@ services:
             - ${WEB_PORT}:6700
         environment:
             WEB_CLIENT_HOST: web-client
+            API_HOST: api
         volumes:
             - ../nginx:/etc/nginx/templates
         depends_on:
@@ -21,4 +22,16 @@ services:
                 NODE_IMAGE: ${NODE_IMAGE}
                 PROJECT_NAME: ${PROJECT_NAME}
         restart: always
+        entrypoint: yarn start
+        depends_on:
+            - api
+    api:
+        container_name: api
+        build:
+            context: ../../services/api
+            args:
+                NODE_IMAGE: ${NODE_IMAGE}
+        restart: always
+        environment:
+            LOCAL_CLIENT_SECRET: ${LOCAL_CLIENT_SECRET}
         entrypoint: yarn start

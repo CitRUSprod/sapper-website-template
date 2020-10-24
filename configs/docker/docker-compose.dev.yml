@@ -10,5 +10,6 @@ services:
             - ${WEB_PORT}:6700
         environment:
             WEB_CLIENT_HOST: localhost
+            API_HOST: localhost
         volumes:
             - ../nginx:/etc/nginx/templates
