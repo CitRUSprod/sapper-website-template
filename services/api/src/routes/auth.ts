@@ -1,25 +1,36 @@
 import { FastifyInstance, FastifyRequest, FastifyPluginOptions } from "fastify"
 import { FastifyAuthFunction } from "fastify-auth"
+import argon2 from "argon2"
+import validator from "validator"
+import Database from "@/db"
 
-interface User {
+const { UserModel } = Database.models
+
+interface LoginData {
+    email: string
+    password: string
+}
+
+interface RegisterData {
+    email: string
     username: string
     password: string
 }
 
 interface UserPayload {
-    username: string
+    id: string
 }
 
-const users: Array<User> = []
+function isGoodEmail(email: string) {
+    return validator.isEmail(email) && validator.matches(email, /^[a-z\d@.]+$/)
+}
 
 export default (
     app: FastifyInstance,
     opts: FastifyPluginOptions,
     done: Function
 ) => {
-    const verifyJwt: FastifyAuthFunction = async (
-        req: FastifyRequest & { body: any }
-    ) => {
+    const verifyJwt: FastifyAuthFunction = async (req: FastifyRequest) => {
         if (!req.raw.headers.authorization) {
             throw new Error("Missing token header")
         }
@@ -47,20 +58,67 @@ export default (
             body: {
                 type: "object",
                 properties: {
-                    username: { type: "string" },
-                    password: { type: "string" }
+                    email: { type: "string", minLength: 6 },
+                    username: { type: "string", minLength: 3, maxLength: 20 },
+                    password: { type: "string", minLength: 8 }
                 },
-                required: ["username", "password"]
+                required: ["email", "username", "password"]
             }
         },
         async handler(req: FastifyRequest & { body: any }, reply) {
             try {
-                const { username, password } = req.body
-                const user = { username, password }
+                const { email, username, password }: RegisterData = req.body
 
-                users.push(user)
+                const trimmedEmail = email.trim().toLowerCase()
+                const trimmedUsername = username.trim()
 
-                reply.send()
+                if (!isGoodEmail(trimmedEmail)) {
+                    reply.code(400).send(new Error("Email is not valid"))
+                    return
+                }
+
+                if (!validator.matches(trimmedUsername, /^\w+$/)) {
+                    reply.code(400).send(new Error("Username is not valid"))
+                    return
+                }
+
+                const userByUsername = await UserModel.findOne({
+                    username: {
+                        $regex: new RegExp(username, "i")
+                    }
+                })
+
+                if (userByUsername) {
+                    reply
+                        .code(400)
+                        .send(
+                            new Error(
+                                "A user with this username already exists"
+                            )
+                        )
+                } else {
+                    const userByEmail = await UserModel.findOne({
+                        email: trimmedEmail
+                    })
+
+                    if (userByEmail) {
+                        reply
+                            .code(400)
+                            .send(
+                                new Error(
+                                    "A user with this email already exists"
+                                )
+                            )
+                    } else {
+                        const passwordHash = await argon2.hash(password)
+                        await UserModel.create({
+                            email: trimmedEmail,
+                            username: trimmedUsername,
+                            password: passwordHash
+                        })
+                        reply.send()
+                    }
+                }
             } catch (err) {
                 reply.send(err)
             }
@@ -72,29 +130,42 @@ export default (
             body: {
                 type: "object",
                 properties: {
-                    username: { type: "string" },
-                    password: { type: "string" }
+                    email: { type: "string", minLength: 6 },
+                    password: { type: "string", minLength: 8 }
                 },
-                required: ["username", "password"]
+                required: ["email", "password"]
             }
         },
         async handler(req: FastifyRequest & { body: any }, reply) {
-            const { username, password } = req.body
+            const { email, password }: LoginData = req.body
 
-            const user = users.find(u => u.username === username)
+            const trimmedEmail = email.trim().toLowerCase()
+
+            if (!isGoodEmail(trimmedEmail)) {
+                reply.code(400).send(new Error("Email is not valid"))
+                return
+            }
+
+            const user = await UserModel.findOne({ email: trimmedEmail })
 
             if (user) {
-                if (user.password === password) {
+                const isCorrect = await argon2.verify(user.password, password)
+
+                if (isCorrect) {
                     const payload: UserPayload = {
-                        username: user.username
+                        id: user.id
                     }
-                    const token = await app.jwt.sign(payload)
+                    const token = await app.jwt.sign(payload, {
+                        expiresIn: 14 * 24 * 60 * 60
+                    })
                     reply.send({ token })
                 } else {
                     reply.code(400).send(new Error("Incorrect password"))
                 }
             } else {
-                reply.code(400).send(new Error("User not found"))
+                reply
+                    .code(400)
+                    .send(new Error("User with such email was not found"))
             }
         }
     })
@@ -102,8 +173,8 @@ export default (
     app.get("/user", {
         preHandler: app.auth([verifyJwt]),
         async handler(req: FastifyRequest & { user: any }, reply) {
-            const user: UserPayload = req.user
-            reply.send({ ...user })
+            const { id }: UserPayload = req.user
+            reply.send({ id })
         }
     })
 

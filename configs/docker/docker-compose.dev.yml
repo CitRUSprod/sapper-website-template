@@ -13,3 +13,11 @@ services:
             API_HOST: localhost
         volumes:
             - ../nginx:/etc/nginx/templates
+    mongo:
+        container_name: mongo
+        image: ${MONGO_IMAGE}
+        restart: always
+        ports:
+            - ${DB_PORT}:27017
+        volumes:
+            - ../../volumes/mongo:/data/db
