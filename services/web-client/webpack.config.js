@@ -67,10 +67,7 @@ module.exports = {
                 },
                 {
                     test: /\.ts$/,
-                    loader: "esbuild-loader",
-                    options: {
-                        loader: "ts"
-                    }
+                    loader: "ts-loader"
                 },
                 {
                     test: /\.css$/,
@@ -136,10 +133,7 @@ module.exports = {
                 },
                 {
                     test: /\.ts$/,
-                    loader: "esbuild-loader",
-                    options: {
-                        loader: "ts"
-                    }
+                    loader: "ts-loader"
                 },
                 {
                     test: /\.(svelte|html)$/,
