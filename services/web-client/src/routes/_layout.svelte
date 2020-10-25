@@ -4,6 +4,7 @@
 
 <script lang="ts">
     import { MaterialApp } from "svelte-materialify/src"
+    import Message from "@/components/Message.svelte"
 </script>
 
 <svelte:head>
@@ -12,6 +13,7 @@
 
 <MaterialApp>
     <slot />
+    <Message />
 </MaterialApp>
 
 <style lang="scss">
