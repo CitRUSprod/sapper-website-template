@@ -155,10 +155,16 @@ export default (
                     const payload: UserPayload = {
                         id: user.id
                     }
+                    const time = 14 * 24 * 60 * 60
                     const token = await app.jwt.sign(payload, {
-                        expiresIn: 14 * 24 * 60 * 60
+                        expiresIn: time
                     })
-                    reply.send({ token })
+                    reply
+                        .setCookie("token", token, {
+                            path: "/",
+                            expires: new Date(Date.now() + time * 1000)
+                        })
+                        .send({ token })
                 } else {
                     reply.code(400).send(new Error("Incorrect password"))
                 }
@@ -174,7 +180,18 @@ export default (
         preHandler: app.auth([verifyJwt]),
         async handler(req: FastifyRequest & { user: any }, reply) {
             const { id }: UserPayload = req.user
-            reply.send({ id })
+
+            const user = await UserModel.findById(id)
+
+            if (user) {
+                const userInfo = {
+                    email: user.email,
+                    username: user.username
+                }
+                reply.send(userInfo)
+            } else {
+                reply.send(new Error("User not found"))
+            }
         }
     })
 
