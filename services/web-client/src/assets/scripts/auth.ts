@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "./axios"
 import Cookes from "js-cookie"
 
 export async function register(

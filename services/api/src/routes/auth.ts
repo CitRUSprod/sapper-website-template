@@ -1,10 +1,10 @@
+import _ from "lodash"
 import { FastifyInstance, FastifyRequest, FastifyPluginOptions } from "fastify"
 import { FastifyAuthFunction } from "fastify-auth"
 import argon2 from "argon2"
+import nodemailer from "nodemailer"
 import validator from "validator"
 import Database from "@/db"
-
-const { UserModel } = Database.models
 
 interface LoginData {
     email: string
@@ -17,8 +17,76 @@ interface RegisterData {
     password: string
 }
 
+interface VerifyEmailData {
+    token: string
+}
+
 interface UserPayload {
     id: string
+}
+
+interface EmailVerificationToken {
+    email: string
+    token: string
+    timeout: NodeJS.Timeout
+}
+
+const { UserModel } = Database.models
+
+const gmail = {
+    username: process.env.GMAIL_USERNAME as string,
+    password: process.env.GMAIL_PASSWORD as string,
+    name: process.env.GMAIL_NAME as string
+}
+
+const transporter = nodemailer.createTransport(
+    {
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+            user: `${gmail.username}@gmail.com`,
+            pass: gmail.password
+        }
+    },
+    {
+        from: `${gmail.name} <${gmail.username}@gmail.com>`
+    }
+)
+
+function sendMail(to: string, subject: string, message: string) {
+    return new Promise((resolve, reject) => {
+        transporter.sendMail({ to, subject, html: message }, (err, info) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(info)
+            }
+        })
+    })
+}
+
+function generateToken(length = 8) {
+    const symbols =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+    let token = ""
+
+    for (let i = 0; i < length; i++) {
+        const symbol = _.random(0, symbols.length - 1)
+        token += symbols[symbol]
+    }
+
+    return token
+}
+
+const emailVerificationTokens: Array<EmailVerificationToken> = []
+
+function generateUniqToken(length = 8): string {
+    const token = generateToken(length)
+    const found = _.find(emailVerificationTokens, { token })
+
+    return found ? generateUniqToken(length) : token
 }
 
 function isGoodEmail(email: string) {
@@ -84,7 +152,7 @@ export default (
 
                 const userByUsername = await UserModel.findOne({
                     username: {
-                        $regex: new RegExp(username, "i")
+                        $regex: new RegExp(`^${username}$`, "i")
                     }
                 })
 
@@ -186,11 +254,82 @@ export default (
             if (user) {
                 const userInfo = {
                     email: user.email,
-                    username: user.username
+                    username: user.username,
+                    verified: user.verified
                 }
                 reply.send(userInfo)
             } else {
                 reply.send(new Error("User not found"))
+            }
+        }
+    })
+
+    app.post("/send-email-verification", {
+        preHandler: app.auth([verifyJwt]),
+        async handler(req: FastifyRequest & { user: any }, reply) {
+            const { id }: UserPayload = req.user
+
+            const user = await UserModel.findById(id)
+
+            if (user) {
+                if (user.verified) {
+                    reply.code(400).send(new Error("Email is already verified"))
+                    return
+                }
+
+                const { email, username } = user
+                const token = generateUniqToken()
+                emailVerificationTokens.push({
+                    email,
+                    token,
+                    timeout: setTimeout(() => {
+                        _.remove(emailVerificationTokens, t => {
+                            return t.email === email
+                        })
+                    }, 24 * 60 * 60 * 1000)
+                })
+
+                const subject = "Email confirmation"
+                const message = `<h3>Dear ${username}</h3>\n<div><a href="http://127.0.0.1:6700/auth/verify-email-${token}">Confirm Email</a></div>`
+                await sendMail(email, subject, message)
+
+                reply.send()
+            } else {
+                reply.send(new Error("User not found"))
+            }
+        }
+    })
+
+    app.post("/verify-email", {
+        schema: {
+            body: {
+                type: "object",
+                properties: {
+                    token: { type: "string" }
+                },
+                required: ["token"]
+            }
+        },
+        async handler(req: FastifyRequest & { body: any }, reply) {
+            const { token }: VerifyEmailData = req.body
+
+            const found = _.find(emailVerificationTokens, { token })
+
+            if (found) {
+                const user = await UserModel.findOne({ email: found.email })
+
+                if (user) {
+                    user.verified = true
+                    await user.save()
+                    _.remove(emailVerificationTokens, t => {
+                        return t.token === token
+                    })
+                    reply.send()
+                } else {
+                    reply.send(new Error("User not found"))
+                }
+            } else {
+                reply.send(new Error("Invalid or expired token"))
             }
         }
     })

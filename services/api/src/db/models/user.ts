@@ -10,6 +10,9 @@ class User {
 
     @prop({ required: true })
     password!: string
+
+    @prop({ default: false })
+    verified?: boolean
 }
 
 export const UserModel = getModelForClass(User)
