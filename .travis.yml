@@ -3,5 +3,10 @@ language: node_js
 node_js:
     - 14.14.0
 
+install:
+    - yarn
+    - yarn lerna:install
+    - yarn lerna:run prod
+
 script:
     - yarn ci
