@@ -3,7 +3,8 @@
     "scripts": {
         "dev": "webpack --config ./webpack/dev.js",
         "prod": "webpack --config ./webpack/prod.js",
-        "start": "node ./dist/main.js"
+        "start": "node ./dist/main.js",
+        "validate": "tsc --noEmit"
     },
     "devDependencies": {
         "@types/lodash": "4.14.164",

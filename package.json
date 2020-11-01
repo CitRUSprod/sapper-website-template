@@ -5,12 +5,13 @@
         "git:commit": "git-cz",
         "lerna:install": "lerna bootstrap",
         "lerna:run": "lerna run",
+        "validate": "yarn lerna:run validate",
         "prettier": "prettier --check",
         "prettier:fix": "yarn prettier --write",
-        "prettier:all": "yarn prettier \"**/*.{html,md,json,yml,yaml,js,ts,svelte,css,scss}\"",
+        "prettier:all": "yarn prettier \"**/*.{html,md,json,yml,yaml,js,ts,svelte,css,scss}\" \"!volumes\"",
         "prettier:fix:all": "yarn prettier:all --write",
-        "lint": "yarn prettier:all",
-        "lint:fix": "yarn prettier:fix:all",
+        "lint": "yarn validate && yarn prettier:all",
+        "lint:fix": "yarn validate && yarn prettier:fix:all",
         "ci": "yarn lint"
     },
     "lerna": {
@@ -31,7 +32,7 @@
     "husky": {
         "hooks": {
             "commit-msg": "commitlint -E HUSKY_GIT_PARAMS -g ./configs/commits/commitlint.js",
-            "pre-commit": "lint-staged"
+            "pre-commit": "yarn validate && lint-staged"
         }
     },
     "lint-staged": {
