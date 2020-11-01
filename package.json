@@ -12,7 +12,7 @@
         "prettier:fix:all": "yarn prettier:all --write",
         "lint": "yarn validate && yarn prettier:all",
         "lint:fix": "yarn validate && yarn prettier:fix:all",
-        "ci": "yarn lint"
+        "ci": "yarn lerna:install && yarn lerna:run prod && yarn lint"
     },
     "lerna": {
         "npmClient": "yarn",

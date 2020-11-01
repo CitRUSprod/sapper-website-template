@@ -2,7 +2,7 @@
     "name": "web-client",
     "scripts": {
         "dev": "run-p validate:dev sapper:dev",
-        "prod": "run-s validate sapper:build",
+        "prod": "yarn sapper:build",
         "start": "node __sapper__/build",
         "validate": "svelte-check --ignore src/node_modules/@sapper",
         "validate:dev": "svelte-check --ignore src/node_modules/@sapper --watch",

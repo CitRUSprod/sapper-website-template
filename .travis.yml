@@ -4,4 +4,4 @@ node_js:
     - 14.14.0
 
 script:
-    - yarn lerna:install && yarn ci
+    - yarn ci
