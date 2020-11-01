@@ -38,6 +38,9 @@ services:
             MONGO_HOST: mongo
             MONGO_DB_NAME: ${MONGO_DB_NAME}
             LOCAL_CLIENT_SECRET: ${LOCAL_CLIENT_SECRET}
+            GMAIL_USERNAME: ${GMAIL_USERNAME}
+            GMAIL_PASSWORD: ${GMAIL_PASSWORD}
+            GMAIL_NAME: ${GMAIL_NAME}
         entrypoint: yarn start
         depends_on:
             - mongo
