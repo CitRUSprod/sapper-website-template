@@ -6,7 +6,8 @@ import cookieParser from "cookie-parser"
 import * as sapper from "@sapper/server"
 
 const dev = process.env.NODE_ENV === "development"
-const apiHost = process.env.API_HOST ?? "localhost"
+const webHost = process.env.WEB_HOST ?? "localhost"
+const webPort = process.env.WEB_PORT
 
 polka()
     .use(
@@ -20,7 +21,7 @@ polka()
 
             try {
                 const { data } = await axios.get(
-                    `http://${apiHost}:6700/api/auth/user`,
+                    `http://${webHost}:${webPort}/api/auth/user`,
                     {
                         headers: {
                             authorization: `Bearer ${token}`

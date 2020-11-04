@@ -23,7 +23,8 @@ services:
                 PROJECT_NAME: ${PROJECT_NAME}
         restart: always
         environment:
-            API_HOST: nginx
+            WEB_HOST: nginx
+            WEB_PORT: ${WEB_PORT}
         entrypoint: yarn start
         depends_on:
             - api
@@ -35,6 +36,7 @@ services:
                 NODE_IMAGE: ${NODE_IMAGE}
         restart: always
         environment:
+            WEB_PORT: ${WEB_PORT}
             MONGO_HOST: mongo
             MONGO_DB_NAME: ${MONGO_DB_NAME}
             LOCAL_CLIENT_SECRET: ${LOCAL_CLIENT_SECRET}

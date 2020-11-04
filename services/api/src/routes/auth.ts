@@ -33,6 +33,8 @@ interface EmailVerificationToken {
 
 const { UserModel } = Database.models
 
+const webPort = process.env.WEB_PORT as string
+
 const gmail = {
     username: process.env.GMAIL_USERNAME as string,
     password: process.env.GMAIL_PASSWORD as string,
@@ -290,7 +292,7 @@ export default (
                 })
 
                 const subject = "Email confirmation"
-                const message = `<h3>Dear ${username}</h3>\n<div><a href="http://127.0.0.1:6700/auth/verify-email-${token}">Confirm Email</a></div>`
+                const message = `<h3>Dear ${username}</h3>\n<div><a href="http://127.0.0.1:${webPort}/auth/verify-email-${token}">Confirm Email</a></div>`
                 await sendMail(email, subject, message)
 
                 reply.send()
