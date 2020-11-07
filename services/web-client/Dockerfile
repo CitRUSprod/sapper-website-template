@@ -4,10 +4,6 @@ FROM ${NODE_IMAGE}
 
 WORKDIR /services/web-client
 
-ARG PROJECT_NAME
-
-ENV PROJECT_NAME ${PROJECT_NAME}
-
 COPY . .
 
 RUN yarn
