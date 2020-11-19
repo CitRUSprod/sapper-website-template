@@ -3,3 +3,5 @@
 SCRIPTS_DIR=$(dirname "$0")
 
 "$SCRIPTS_DIR"/run-mode prod "$@"
+
+exit 0
