@@ -1,5 +1,5 @@
 {
-    "name": "website-template",
+    "name": "sapper-website-template",
     "private": true,
     "scripts": {
         "git:commit": "git-cz",

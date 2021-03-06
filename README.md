@@ -1,4 +1,4 @@
-# Website Template
+# Sapper Website Template
 
 > Create a website with Svelte/Sapper, TypeScript, Docker, MongoDB and Nginx.
 
@@ -7,7 +7,7 @@
 Create a new project based on this template using degit:
 
 ```sh
-npx degit CitRUSprod/website-template my-website
+npx degit CitRUSprod/sapper-website-template my-website
 cd my-website
 ```
 
